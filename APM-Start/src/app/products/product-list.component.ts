@@ -66,7 +66,10 @@ export class ProductListComponent {
   //   map(products => products.filter(product => this.selectedCategoryId? product.categoryId === this.selectedCategoryId: true))
   // )
 
+
   constructor(private productService: ProductService, private productCategoryService: ProductCategoryService) {}
+
+
 
   onAdd(): void {
     console.log('Not yet implemented');

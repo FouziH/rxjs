@@ -13,9 +13,12 @@ import { ProductService } from '../product.service';
 export class ProductListAltComponent {
   pageTitle = 'Products';
   errorMessage = '';
-  selectedProductId = 0;
+  // selectedProductId = 0;
 
-  products$ = this.productService.products$.pipe(
+
+  selectedProduct$ = this.productService.selectedProduct$
+
+  products$ = this.productService.productWithCategory$.pipe(
     catchError(err =>{
       this.errorMessage = err;
       //return empty array
@@ -32,6 +35,9 @@ export class ProductListAltComponent {
  
 
   onSelected(productId: number): void {
-    console.log('Not yet implemented');
+    console.log('Not yet implemented', 'but productId is', productId);
+
+    this.productService.selectedProductChanged(productId)
+
   }
 }
