@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { catchError, pipe, map, Observable, of, EMPTY, filter, Subject, combineLatest, retry } from 'rxjs';
+import { catchError, pipe, map, Observable, of, EMPTY, filter, Subject, combineLatest, retry, startWith, BehaviorSubject } from 'rxjs';
 
 import { ProductCategory } from '../product-categories/product-category';
 import { ProductCategoryService } from "../product-categories/product-category.service";
@@ -22,8 +22,10 @@ export class ProductListComponent {
 
   /**Relates 2 in the component html */
 
-  private categorySelectedSubject$ = new Subject<number>()
-  categorySelectedAction$ = this.categorySelectedSubject$.asObservable()
+  // private categorySelectedSubject = new Subject<number>()
+      //Vs BehaviorSubject
+  private categorySelectedSubject = new BehaviorSubject<number>(0)
+  categorySelectedAction$ = this.categorySelectedSubject.asObservable()
 
 
   /** Relates part 1 in the component html */
@@ -38,7 +40,10 @@ export class ProductListComponent {
 
   products$ = combineLatest([
     this.productService.productWithCategory$,
-    this.categorySelectedAction$
+    this.categorySelectedAction$ /*.pipe(
+      part of the Subject BehaviorSubject donnot need the startwith
+      startWith(0)
+    )*/
   ]).pipe(
     map(([products, selectedCategoryId]) => products.filter(product => selectedCategoryId ? product.categoryId === selectedCategoryId : true)),
     catchError(error => {
@@ -72,6 +77,8 @@ export class ProductListComponent {
 
     /** relates 1 from the component */
     // this.selectedCategoryId = +categoryId
+
+    this.categorySelectedSubject.next(+categoryId)
 
 
 
