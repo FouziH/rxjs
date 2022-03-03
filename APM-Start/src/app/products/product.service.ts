@@ -59,9 +59,10 @@ export class ProductService {
   ]).pipe(
     map(([products, selectedProductId]) => 
     products.find(product => product.id === selectedProductId), 
-    tap(product=> console.log(`SelectedProduct ${product}`))
+    tap(product=> console.log(`SelectedProduct ${product}`)), 
     
-    )
+    ),
+    shareReplay(1)
   )
 
   private productInsertedSubject = new Subject<Product>();
