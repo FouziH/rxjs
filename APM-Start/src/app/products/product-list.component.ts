@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { catchError, pipe, map, Observable, of, EMPTY, filter } from 'rxjs';
+import { catchError, pipe, map, Observable, of, EMPTY, filter, Subject, combineLatest, retry } from 'rxjs';
 
 import { ProductCategory } from '../product-categories/product-category';
 import { ProductCategoryService } from "../product-categories/product-category.service";
@@ -16,16 +16,36 @@ export class ProductListComponent {
   pageTitle = 'Product List';
   errorMessage = '';
   // categories: ProductCategory[] = [];
-  selectedCategoryId = 1;
 
-  products$ = this.productService.productWithCategory$.pipe(
-    catchError((err) => {
-      this.errorMessage = err;
-      //return empty array
-      //  return of([]);
-      return EMPTY;
+  /**Relates 1 in th ehtml component */
+  // selectedCategoryId = 1;
+
+  /**Relates 2 in the component html */
+
+  private categorySelectedSubject$ = new Subject<number>()
+  categorySelectedAction$ = this.categorySelectedSubject$.asObservable()
+
+
+  /** Relates part 1 in the component html */
+  // products$ = this.productService.productWithCategory$.pipe(
+  //   catchError((err) => {
+  //     this.errorMessage = err;
+  //     //return empty array
+  //     //  return of([]);
+  //     return EMPTY;
+  //   })
+  // );
+
+  products$ = combineLatest([
+    this.productService.productWithCategory$,
+    this.categorySelectedAction$
+  ]).pipe(
+    map(([products, selectedCategoryId]) => products.filter(product => selectedCategoryId ? product.categoryId === selectedCategoryId : true)),
+    catchError(error => {
+      this.errorMessage = error;
+      return EMPTY
     })
-  );
+  )
 
   categories$
  = this.productCategoryService.productCategory$.pipe(
@@ -49,7 +69,11 @@ export class ProductListComponent {
 
   onSelected(categoryId: string): void {
     // console.log('Not yet implemented');
-    this.selectedCategoryId = +categoryId
+
+    /** relates 1 from the component */
+    // this.selectedCategoryId = +categoryId
+
+
 
     
   }
