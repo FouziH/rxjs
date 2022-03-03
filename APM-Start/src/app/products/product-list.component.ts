@@ -14,7 +14,9 @@ import { ProductService } from './product.service';
 })
 export class ProductListComponent {
   pageTitle = 'Product List';
-  errorMessage = '';
+  errorMessageSubject = new Subject<string>()
+
+  errorMessage$ = this.errorMessageSubject.asObservable()
   // categories: ProductCategory[] = [];
 
   /**Relates 1 in th ehtml component */
@@ -47,7 +49,7 @@ export class ProductListComponent {
   ]).pipe(
     map(([products, selectedCategoryId]) => products.filter(product => selectedCategoryId ? product.categoryId === selectedCategoryId : true)),
     catchError(error => {
-      this.errorMessage = error;
+      this.errorMessageSubject.next(error);
       return EMPTY
     })
   )
@@ -55,7 +57,7 @@ export class ProductListComponent {
   categories$
  = this.productCategoryService.productCategory$.pipe(
    catchError(error => {
-     this.errorMessage = error;
+     this.errorMessageSubject.next(error);
      return EMPTY
    })
  )
