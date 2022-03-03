@@ -41,7 +41,7 @@ export class ProductListComponent {
   // );
 
   products$ = combineLatest([
-    this.productService.productWithCategory$,
+    this.productService.productsWithAdd$,
     this.categorySelectedAction$ /*.pipe(
       part of the Subject BehaviorSubject donnot need the startwith
       startWith(0)
@@ -74,7 +74,8 @@ export class ProductListComponent {
 
 
   onAdd(): void {
-    console.log('Not yet implemented');
+    // console.log('Not yet implemented');
+    this.productService.addProduct()
   }
 
   onSelected(categoryId: string): void {
