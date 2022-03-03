@@ -49,5 +49,6 @@ export class ProductListComponent {
     // console.log('Not yet implemented');
     this.selectedCategoryId = +categoryId
 
+    
   }
 }
