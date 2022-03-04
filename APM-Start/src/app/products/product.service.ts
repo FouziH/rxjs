@@ -1,11 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 
-import { BehaviorSubject, catchError, combineLatest, map, merge, Observable, scan, share, shareReplay, Subject, tap, throwError,} from 'rxjs';
+import { BehaviorSubject, catchError, combineLatest, filter, forkJoin, map, merge, Observable, of, scan, shareReplay, Subject, switchMap, tap, throwError } from 'rxjs';
+
 
 import { Product } from './product';
 import { ProductCategoryService } from "../product-categories/product-category.service";
 import { SupplierService } from "../suppliers/supplier.service";
+import { ThisReceiver } from "@angular/compiler";
+import { Supplier } from "../suppliers/supplier";
 
 @Injectable({
   providedIn: 'root'
@@ -66,12 +69,16 @@ export class ProductService {
     shareReplay(1)
   )
 
-  selectedProductSuppliers$ = combineLatest([
-    this.selectedProduct$, 
-    this.supplierService.suppliers$
-  ]).pipe(
-   map(([selectedProduct, suppliers]) =>suppliers.filter(supplier  => selectedProduct?.supplierIds?.includes(supplier.id)))
-  )
+  //NOT JUST INTIME WAY
+  // selectedProductSuppliers$ = combineLatest([
+  //   this.selectedProduct$, 
+  //   this.supplierService.suppliers$
+  // ]).pipe(
+  //  map(([selectedProduct, suppliers]) =>suppliers.filter(supplier  => selectedProduct?.supplierIds?.includes(supplier.id)))
+  // )
+
+  //INTIME WAY WHEN MAKING SELECTION 
+ 
 
   private productInsertedSubject = new Subject<Product>();
   productInsertedAction$ = this.productInsertedSubject.asObservable()
@@ -83,7 +90,20 @@ export class ProductService {
     scan((acc, value)=> 
     (value instanceof Array) ? [...value]: [...acc, value], [] as Product [])
   )
-  
+  selectedProductSuppliers$ = this.selectedProduct$
+    .pipe(
+      filter(product => Boolean(product)),
+      switchMap(selectedProduct => {
+        if (selectedProduct?.supplierIds) {
+          return forkJoin(selectedProduct.supplierIds.map(supplierId =>
+            this.http.get<Supplier>(`${this.suppliersUrl}/${supplierId}`)))
+        } else {
+          return of([]);
+        }
+      }),
+      tap(suppliers => console.log('product suppliers', JSON.stringify(suppliers)))
+    );
+
   
   constructor(private http: HttpClient, private productCategoryService: ProductCategoryService , private supplierService: SupplierService) { }
 
