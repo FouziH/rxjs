@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 
-import { BehaviorSubject, catchError, combineLatest, map, merge, Observable, scan, share, shareReplay, Subject, tap, throwError } from 'rxjs';
+import { BehaviorSubject, catchError, combineLatest, map, merge, Observable, scan, share, shareReplay, Subject, tap, throwError,} from 'rxjs';
 
 import { Product } from './product';
 import { ProductCategoryService } from "../product-categories/product-category.service";
@@ -64,6 +64,13 @@ export class ProductService {
     
     ),
     shareReplay(1)
+  )
+
+  selectedProductSuppliers$ = combineLatest([
+    this.selectedProduct$, 
+    this.supplierService.suppliers$
+  ]).pipe(
+   map(([selectedProduct, suppliers]) =>suppliers.filter(supplier  => selectedProduct?.supplierIds?.includes(supplier.id)))
   )
 
   private productInsertedSubject = new Subject<Product>();
