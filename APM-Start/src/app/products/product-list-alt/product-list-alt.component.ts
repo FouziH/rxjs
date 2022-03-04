@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
-import { catchError, EMPTY } from 'rxjs';
+import { catchError, EMPTY, Subject } from 'rxjs';
 
 import { Product } from '../product';
 import { ProductService } from '../product.service';
@@ -12,12 +12,15 @@ import { ProductService } from '../product.service';
 })
 export class ProductListAltComponent {
   pageTitle = 'Products';
-  errorMessage = '';
-  selectedProductId = 0;
+  private errorMessageSubject = new Subject<string>();
+  errorMessage$ = this.errorMessageSubject.asObservable()
 
-  products$ = this.productService.products$.pipe(
+
+  selectedProduct$ = this.productService.selectedProduct$
+
+  products$ = this.productService.productWithCategory$.pipe(
     catchError(err =>{
-      this.errorMessage = err;
+      this.errorMessageSubject.next(err);
       //return empty array
      //  return of([]);
       return EMPTY
@@ -32,6 +35,9 @@ export class ProductListAltComponent {
  
 
   onSelected(productId: number): void {
-    console.log('Not yet implemented');
+    console.log('Not yet implemented', 'but productId is', productId);
+
+    this.productService.selectedProductChanged(productId)
+
   }
 }
